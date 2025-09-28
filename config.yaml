@@ -1,0 +1,146 @@
+SETTINGS:
+    # discord token use for press reaction task etc, for getting emojis info
+    DISCORD_TOKEN_FOR_PARSING: ""
+    # proxy for parsing. format: username:password@ip:port
+    PROXY_FOR_PARSING: ""
+
+    # number of concurrent threads
+    THREADS: 1
+
+    # number of retries for ANY action
+    ATTEMPTS: 5
+
+    # shuffle accounts in random order
+    SHUFFLE_ACCOUNTS: true
+
+    # account range.
+    # BY DEFAULT: [0, 0] - all accounts
+    # [3, 5] - only 3 4 5 accounts
+    # [7, 7] - only 7 account
+    ACCOUNTS_RANGE: [0, 0]
+
+    # WORKS ONLY IF ACCOUNTS_RANGE IS [0, 0]
+    # exact accounts to use. 
+    # BY DEFAULT: [] - all accounts
+    # Example: [1, 4, 6] - bot will use only 1, 4 and 6 accounts
+    EXACT_ACCOUNTS_TO_USE: []
+
+    # pause between attempts
+    PAUSE_BETWEEN_ATTEMPTS: [1, 2]
+
+    # pause in seconds between accounts
+    RANDOM_PAUSE_BETWEEN_ACCOUNTS: [1, 2]
+
+    # pause in seconds between actions
+    RANDOM_PAUSE_BETWEEN_ACTIONS: [1, 2]
+
+    # random pause before start of every account
+    # to make sure that all accounts will be started at different times
+    RANDOM_INITIALIZATION_PAUSE: [1, 2]
+
+    # use random profile pictures for change profile picture task
+    RANDOM_PROFILE_PICTURES: true
+
+
+AI_CHATTER:
+    # discord server id where bot will send messages
+    GUILD_ID: ""
+
+    # discord channel id where bot will send messages
+    CHANNEL_ID: ""
+
+    # if a bot is asked something, what is the probability that it will answer or ignore the question
+    ANSWER_PERCENTAGE: 50
+
+    # How many percent of texts will be REPLY to other users' texts
+    # the rest of the sms will just be sent to the chat.
+    # if 0, the bot will answer to no one
+    # if 100, the bot will send only replies to other users' sms.
+    REPLY_PERCENTAGE: 50
+
+    # number of messages to send
+    MESSAGES_TO_SEND_PER_ACCOUNT: [3, 5]
+
+    # pause between messages
+    PAUSE_BETWEEN_MESSAGES: [3, 5]
+
+    # pause after getting response from chatgpt and before sending message to discord
+    PAUSE_BEFORE_MESSAGE: [1, 2]
+    
+
+MESSAGE_SENDER:
+    # discord server id where bot will send messages
+    GUILD_ID: ""
+
+    # discord channel id where bot will send messages
+    CHANNEL_ID: ""
+    
+    # delete message instantly after sending
+    DELETE_MESSAGE_INSTANTLY: false
+
+    # send messages randomly
+    SEND_MESSAGES_RANDOMLY: false
+
+    # number of messages to send FOR EACH ACCOUNT. SO EACH ACCOUNT WILL SEND THIS AMOUNT OF MESSAGES
+    NUMBER_OF_MESSAGES_TO_SEND: 3
+
+    # pause between messages
+    PAUSE_BETWEEN_MESSAGES: [1, 5]
+
+
+CHAT_GPT:
+    # list of api keys. bot will use random api key for every message.
+    API_KEYS: ["sk-proj-"]
+    # chatgpt model to use. https://platform.openai.com/docs/models
+    MODEL: "gpt-4o"
+
+    # in some countries you may need to use proxy to access chatgpt.
+    # by default it's empty. format: username:password@ip:port
+    PROXY_FOR_CHAT_GPT: ""
+
+POLICY:
+  TIMEZONE: "Asia/Kolkata"          # тайзона комнаты/сервера
+  ACTIVE_HOURS: [9, 23]             # отвечаем с 09:00 до 23:00
+
+  INITIATIVE_SLOTS:
+    START_HOUR: 9
+    END_HOUR: 23
+    COUNT: 6
+    START_PROB: 0.60                # слот №1 = 60%
+    MIN_PROB: 0.20
+    MAX_PROB: 0.80
+    STEP: 0.10                      # ±10 п.п. по успеху/неуспеху
+    DAILY_TARGET_MIN: 4
+    DAILY_TARGET_MAX: 6
+    LOW_REPLIES_THRESHOLD_PER_DAY: 2
+    LOW_REPLIES_CONSECUTIVE_DAYS: 2
+    TEMP_TARGET_ON_LOW_REPLIES: 6
+
+  REPLY_POLICY:
+    STRONG_REPLY_PROB: 0.90         # явные обращения (@reply/mention)
+    WEAK_REPLY_PROB: 0.60           # «слабые» обращения по контексту
+    REPLY_WITHIN_MINUTES: 3
+    THREAD_MAX_ACTIONS: 2           # максимум 2 наших действия на ветку
+
+  PAUSES:
+    BETWEEN_INIT_MIN_MINUTES: 45
+    BETWEEN_INIT_MAX_MINUTES: 120
+    MIN_GAP_AFTER_ANY_MESSAGE_MINUTES: 2
+
+  CONTENT:
+    MIN_WORDS: 3
+    MAX_WORDS: 11
+    NO_LINKS: true
+    NO_CHANNEL_MENTIONS: true
+    NO_EMOJI_IN_TEXT: true
+    GREETINGS_PER_LANG: 7
+    GM_RATIO_MAX: 0.50
+
+  DEDUP:
+    WINDOW_HOURS: 24
+
+  RED_FLAGS:
+    SILENCE_HOURS: 24               # 429/Verify -> молчание 24ч
+
+STATE:
+  PATH: "data/state.json"           # куда складывать счётчики/стейт
