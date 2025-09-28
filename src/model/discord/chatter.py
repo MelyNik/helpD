@@ -261,6 +261,38 @@ class DiscordChatter:
         reply_to_message_id: str = None,
     ) -> tuple[bool, dict]:
         try:
+
+            # === POLICY GATE START ===
+            policy = getattr(self.config, "POLICY_ENGINE", None)
+            account_id = str(getattr(self.account, "index", "acc"))
+            thread_id = reply_to_message_id if reply_to_message_id else None
+
+            if policy:
+                if reply_to_message_id:
+                    # Reply path
+                    decision, payload = policy.should_reply({
+                        "account": account_id,
+                        "channel": channel_id,
+                        "thread_id": thread_id,
+                        "is_strong": True,
+                    })
+                    if decision is None:
+                        return False, {}
+                    if decision == "reaction":
+                        # Fallback: use a very short polite text instead of real reaction
+                        message = "ok noted, thanks"
+                    # Enforce content & dedup
+                    message = policy.enforce_content(message)
+                    if not policy.is_allowed_text(account_id, channel_id, thread_id, message):
+                        return False, {}
+                else:
+                    # Initiative path
+                    if not policy.should_initiate(account_id, channel_id):
+                        return False, {}
+                    message = policy.enforce_content(message)
+                    if not policy.is_allowed_text(account_id, channel_id, None, message):
+                        return False, {}
+            # === POLICY GATE END ===
             headers = {
                 "authorization": self.account.token,
                 "content-type": "application/json",
@@ -307,125 +339,4 @@ class DiscordChatter:
             logger.error(f"{self.account.index} | Error in send_message: {e}")
             return False, None
 
-    async def _get_last_chat_messages(
-        self, guild_id: str, channel_id: str, quantity: int = 50
-    ) -> list[str]:
-        try:
-
-            headers = {
-                "authorization": self.account.token,
-                "referer": f"https://discord.com/channels/{guild_id}/{channel_id}",
-                "x-discord-locale": "en-US",
-                "x-discord-timezone": "Etc/GMT-2",
-                # 'x-super-properties': 'eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiQ2hyb21lIiwiZGV2aWNlIjoiIiwic3lzdGVtX2xvY2FsZSI6InJ1IiwiYnJvd3Nlcl91c2VyX2FnZW50IjoiTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEzMi4wLjAuMCBTYWZhcmkvNTM3LjM2IiwiYnJvd3Nlcl92ZXJzaW9uIjoiMTMyLjAuMC4wIiwib3NfdmVyc2lvbiI6IjEwIiwicmVmZXJyZXIiOiJodHRwczovL2Rpc2NvcmQuY29tLyIsInJlZmVycmluZ19kb21haW4iOiJkaXNjb3JkLmNvbSIsInJlZmVycmVyX2N1cnJlbnQiOiIiLCJyZWZlcnJpbmdfZG9tYWluX2N1cnJlbnQiOiIiLCJyZWxlYXNlX2NoYW5uZWwiOiJzdGFibGUiLCJjbGllbnRfYnVpbGRfbnVtYmVyIjozNjY5NTUsImNsaWVudF9ldmVudF9zb3VyY2UiOm51bGwsImhhc19jbGllbnRfbW9kcyI6ZmFsc2V9',
-            }
-
-            params = {
-                "limit": str(quantity),
-            }
-
-            response = await self.client.get(
-                f"https://discord.com/api/v9/channels/{channel_id}/messages",
-                params=params,
-                headers=headers,
-            )
-
-            if response.status_code != 200:
-                logger.error(
-                    f"Error in _get_last_chat_messages: {response.status_code} | {response.text}"
-                )
-                return []
-
-            received_messages = []
-            for message in response.json():
-                try:
-                    if (
-                        "you just advanced to level" in message["content"]
-                        or message["content"] == ""
-                    ):
-                        continue
-
-                    message_data = ReceivedMessage(
-                        type=message["type"],
-                        content=message["content"],
-                        message_id=message["id"],
-                        channel_id=message["channel_id"],
-                        author_id=message["author"]["id"],
-                        author_username=message["author"]["username"],
-                        referenced_message_content=(
-                            ""
-                            if message.get("referenced_message") in ["None", None]
-                            else message.get("referenced_message", {}).get(
-                                "content", ""
-                            )
-                        ),
-                        referenced_message_author_id=(
-                            ""
-                            if message.get("referenced_message") in ["None", None]
-                            else message.get("referenced_message", {})
-                            .get("author", {})
-                            .get("id", "")
-                        ),
-                    )
-                    received_messages.append(message_data)
-                except Exception as e:
-                    continue
-
-            return received_messages
-
-        except Exception as e:
-            logger.error(
-                f"{self.account.index} | Error in _get_last_chat_messages: {e}"
-            )
-            return []
-
-    async def _gpt_referenced_messages(
-        self, main_message_content: str, referenced_message_content: str
-    ) -> str:
-        try:
-            user_message = f"""Previous message: "{referenced_message_content}"
-                Reply to it: "{main_message_content}"
-                Generate a natural response continuing this conversation.
-            """
-
-            ok, gpt_response = ask_chatgpt(
-                random.choice(self.config.CHAT_GPT.API_KEYS),
-                self.config.CHAT_GPT.MODEL,
-                user_message,
-                REFERENCED_MESSAGES_SYSTEM_PROMPT,
-                proxy=self.config.CHAT_GPT.PROXY_FOR_CHAT_GPT,
-            )
-
-            if not ok:
-                raise Exception(gpt_response)
-
-            return gpt_response
-        except Exception as e:
-            logger.error(
-                f"{self.account.index} | Error in chatter _gpt_referenced_messages: {e}"
-            )
-            raise e
-
-    async def _gpt_batch_messages(self, messages_contents: list[str]) -> str:
-        try:
-            user_message = f"""
-                Chat history: {messages_contents}
-            """
-
-            ok, gpt_response = ask_chatgpt(
-                random.choice(self.config.CHAT_GPT.API_KEYS),
-                self.config.CHAT_GPT.MODEL,
-                user_message,
-                BATCH_MESSAGES_SYSTEM_PROMPT,
-                proxy=self.config.CHAT_GPT.PROXY_FOR_CHAT_GPT,
-            )
-
-            if not ok:
-                raise Exception(gpt_response)
-
-            return gpt_response
-        except Exception as e:
-            logger.error(
-                f"{self.account.index} | Error in chatter _gpt_batch_messages: {e}"
-            )
-            raise e
+    a
