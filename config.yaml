@@ -1,189 +1,66 @@
+# =======================
+# helpD config.yaml (template, fill the placeholders)
+# =======================
+
 SETTINGS:
-    # discord token use for press reaction task etc, for getting emojis info
-    DISCORD_TOKEN_FOR_PARSING: ""
-    # proxy for parsing. format: username:password@ip:port
-    PROXY_FOR_PARSING: ""
-
-    # number of concurrent threads
-    THREADS: 1
-
-    # number of retries for ANY action
-    ATTEMPTS: 5
-
-    # shuffle accounts in random order
-    SHUFFLE_ACCOUNTS: true
-
-    # account range.
-    # BY DEFAULT: [0, 0] - all accounts
-    # [3, 5] - only 3 4 5 accounts
-    # [7, 7] - only 7 account
-    ACCOUNTS_RANGE: [0, 0]
-
-    # WORKS ONLY IF ACCOUNTS_RANGE IS [0, 0]
-    # exact accounts to use. 
-    # BY DEFAULT: [] - all accounts
-    # Example: [1, 4, 6] - bot will use only 1, 4 and 6 accounts
-    EXACT_ACCOUNTS_TO_USE: []
-
-    # pause between attempts
-    PAUSE_BETWEEN_ATTEMPTS: [1, 2]
-
-    # pause in seconds between accounts
-    RANDOM_PAUSE_BETWEEN_ACCOUNTS: [1, 2]
-
-    # pause in seconds between actions
-    RANDOM_PAUSE_BETWEEN_ACTIONS: [1, 2]
-
-    # random pause before start of every account
-    # to make sure that all accounts will be started at different times
-    RANDOM_INITIALIZATION_PAUSE: [1, 2]
-
-    # use random profile pictures for change profile picture task
-    RANDOM_PROFILE_PICTURES: true
-
+  DISCORD_TOKEN_FOR_PARSING: ""        # токен аккаунта, которым парсим эмодзи/реакции/кнопки
+  PROXY_FOR_PARSING: ""                # proxy для парсинга (user:pass@ip:port или ip:port)
+  THREADS: 1                           # у вас «один первый» — держим один поток
+  ATTEMPTS: 3                          # сколько раз повторяем действие при ошибке
+  SHUFFLE_ACCOUNTS: false              # выключаем перемешивание (фиксированный порядок)
+  ACCOUNTS_RANGE: [1, 9999]            # диапазон индексов аккаунтов (1-based)
+  EXACT_ACCOUNTS_TO_USE: []            # если список не пуст — берём только эти индексы
+  PAUSE_BETWEEN_ATTEMPTS: [10, 25]     # пауза между ретраями (сек)
+  RANDOM_PAUSE_BETWEEN_ACCOUNTS: [0, 0]# у вас «один первый» — глушим паузы между аккаунтами
+  RANDOM_PAUSE_BETWEEN_ACTIONS: [120, 240]   # 2–4 минуты между действиями
+  RANDOM_INITIALIZATION_PAUSE: [0, 0]  # старт без рассинхронизации
+  RANDOM_PROFILE_PICTURES: false       # смена аватарок по задаче Change Profile Picture
 
 AI_CHATTER:
-    # discord server id where bot will send messages
-    GUILD_ID: ""
-
-    # discord channel id where bot will send messages
-    CHANNEL_ID: ""
-
-    # if a bot is asked something, what is the probability that it will answer or ignore the question
-    ANSWER_PERCENTAGE: 50
-
-    # How many percent of texts will be REPLY to other users' texts
-    # the rest of the sms will just be sent to the chat.
-    # if 0, the bot will answer to no one
-    # if 100, the bot will send only replies to other users' sms.
-    REPLY_PERCENTAGE: 50
-
-    # number of messages to send
-    MESSAGES_TO_SEND_PER_ACCOUNT: [3, 5]
-
-    # pause between messages
-    PAUSE_BETWEEN_MESSAGES: [3, 5]
-
-    # pause after getting response from chatgpt and before sending message to discord
-    PAUSE_BEFORE_MESSAGE: [1, 2]
-    
+  GUILD_ID: ""                         # id сервера (guild)
+  CHANNEL_ID: ""                       # id канала
+  ANSWER_PERCENTAGE: 100               # если нам задали вопрос — отвечаем 100%
+  REPLY_PERCENTAGE: 5                  # шанс отвечать на чужие сообщения (3–5% при «шумном» чате)
+  MESSAGES_TO_SEND_PER_ACCOUNT: [4, 6] # инициативные сообщения в день
+  PAUSE_BETWEEN_MESSAGES: [120, 240]   # 2–4 мин между сообщениями
+  PAUSE_BEFORE_MESSAGE: [120, 240]     # 2–4 мин «подумал перед ответом»
 
 MESSAGE_SENDER:
-    # discord server id where bot will send messages
-    GUILD_ID: ""
-
-    # discord channel id where bot will send messages
-    CHANNEL_ID: ""
-    
-    # delete message instantly after sending
-    DELETE_MESSAGE_INSTANTLY: false
-
-    # send messages randomly
-    SEND_MESSAGES_RANDOMLY: false
-
-    # number of messages to send FOR EACH ACCOUNT. SO EACH ACCOUNT WILL SEND THIS AMOUNT OF MESSAGES
-    NUMBER_OF_MESSAGES_TO_SEND: 3
-
-    # pause between messages
-    PAUSE_BETWEEN_MESSAGES: [1, 5]
-
+  GUILD_ID: ""                         # для режима «Send message to the channel»
+  CHANNEL_ID: ""
+  DELETE_MESSAGE_INSTANTLY: false      # пока заглушено
+  SEND_MESSAGES_RANDOMLY: true         # брать случайные реплики из файла
+  NUMBER_OF_MESSAGES_TO_SEND: 6        # сколько сообщений отправить в этом режиме
+  PAUSE_BETWEEN_MESSAGES: [120, 240]   # пауза между ними
 
 CHAT_GPT:
-    # list of api keys. bot will use random api key for every message.
-    API_KEYS: ["sk-proj-"]
-    # chatgpt model to use. https://platform.openai.com/docs/models
-    MODEL: "gpt-4o"
-
-    # in some countries you may need to use proxy to access chatgpt.
-    # by default it's empty. format: username:password@ip:port
-    PROXY_FOR_CHAT_GPT: ""
+  API_KEYS: []                         # можно пусто, если используете .env → OPENAI_API_KEYS
+  MODEL: "gpt-4o"                      # платная модель API; настроим «человечность» промптами
+  PROXY_FOR_CHAT_GPT: ""               # если до openai нужен proxy (user:pass@ip:port / ip:port)
 
 POLICY:
-  TIMEZONE: "Asia/Kolkata"          # тайзона комнаты/сервера
-  ACTIVE_HOURS: [9, 23]             # отвечаем с 09:00 до 23:00
-
+  TIMEZONE: "America/New_York"         # единый ЧП, НЕ завязываем на прокси
+  ACTIVE_HOURS: [9, 23]                # «рабочие» часы
   INITIATIVE_SLOTS:
-    START_HOUR: 9
-    END_HOUR: 23
-    COUNT: 6
-    START_PROB: 0.60                # слот №1 = 60%
-    MIN_PROB: 0.20
-    MAX_PROB: 0.80
-    STEP: 0.10                      # ±10 п.п. по успеху/неуспеху
-    DAILY_TARGET_MIN: 4
-    DAILY_TARGET_MAX: 6
-    LOW_REPLIES_THRESHOLD_PER_DAY: 2
-    LOW_REPLIES_CONSECUTIVE_DAYS: 2
-    TEMP_TARGET_ON_LOW_REPLIES: 6
-
+    TARGET_PER_DAY: [4, 6]             # целевые инициативы/день
+    SLOTS: 6                           # 6 дневных слотов
+    START_PROB: 0.60                   # стартовая вероятность инициативы в слоте
+    STEP: 0.10                         # шаг адаптации (±10 п.п., цель 4–6)
   REPLY_POLICY:
-    STRONG_REPLY_PROB: 0.90         # явные обращения (@reply/mention)
-    WEAK_REPLY_PROB: 0.60           # «слабые» обращения по контексту
-    REPLY_WITHIN_MINUTES: 3
-    THREAD_MAX_ACTIONS: 2           # максимум 2 наших действия на ветку
-
+    STRONG_REPLY_PROB: 0.90            # на явные реплаи отвечаем 90%
+    WEAK_REPLY_PROB: 0.60              # на «слабые» — 60%
+    MAX_ACTIONS_PER_THREAD: 2          # макс. 2 наших действия в одной ветке
+    THINK_DELAY: [120, 180]            # 2–3 мин перед ответом
   PAUSES:
-    BETWEEN_INIT_MIN_MINUTES: 45
-    BETWEEN_INIT_MAX_MINUTES: 120
-    MIN_GAP_AFTER_ANY_MESSAGE_MINUTES: 2
-
+    BETWEEN_INITIATIVES: [2700, 7200]  # 45–120 мин между инициативами
   CONTENT:
     MIN_WORDS: 3
     MAX_WORDS: 11
-    NO_LINKS: true
-    NO_CHANNEL_MENTIONS: true
-    NO_EMOJI_IN_TEXT: true
-    GREETINGS_PER_LANG: 7
-    GM_RATIO_MAX: 0.50
-
+    BAN_LINKS: true                    # запрет ссылок
+    BAN_CHANNEL_PINGS: true            # запрет упоминаний каналов
+    BAN_EMOJIS: false                  # эмодзи по желанию (у вас — допустимы)
+    GM_RATIO_MAX: 0.5                  # доля «gm*» ≤ 50% от всех инициатив
   DEDUP:
-    WINDOW_HOURS: 24
-
+    WINDOW_HOURS: 24                   # не повторять похожие реплики в течение суток
   RED_FLAGS:
-    SILENCE_HOURS: 24               # 429/Verify -> молчание 24ч
-
-STATE:
-  PATH: "data/state.json"           # куда складывать счётчики/стейт
-
-
-POLICY:
-  TIMEZONE: "Asia/Kolkata"
-  ACTIVE_HOURS: [9, 23]
-  INITIATIVE_SLOTS:
-    START_HOUR: 9
-    END_HOUR: 23
-    COUNT: 6
-    START_PROB: 0.60
-    MIN_PROB: 0.20
-    MAX_PROB: 0.80
-    STEP: 0.10
-    DAILY_TARGET_MIN: 4
-    DAILY_TARGET_MAX: 6
-    LOW_REPLIES_THRESHOLD_PER_DAY: 2
-    LOW_REPLIES_CONSECUTIVE_DAYS: 2
-    TEMP_TARGET_ON_LOW_REPLIES: 6
-  REPLY_POLICY:
-    STRONG_REPLY_PROB: 0.90
-    WEAK_REPLY_PROB: 0.60
-    REPLY_WITHIN_MINUTES: 3
-    THREAD_MAX_ACTIONS: 2
-  PAUSES:
-    BETWEEN_INIT_MIN_MINUTES: 45
-    BETWEEN_INIT_MAX_MINUTES: 120
-    MIN_GAP_AFTER_ANY_MESSAGE_MINUTES: 2
-  CONTENT:
-    MIN_WORDS: 3
-    MAX_WORDS: 11
-    NO_LINKS: true
-    NO_CHANNEL_MENTIONS: true
-    NO_EMOJI_IN_TEXT: true
-    GREETINGS_PER_LANG: 7
-    GM_RATIO_MAX: 0.50
-  DEDUP:
-    WINDOW_HOURS: 24
-  RED_FLAGS:
-    SILENCE_HOURS: 24
-  # (опц.) Пер-канальные лимиты
-  PER_CHANNEL_LIMITS: {}
-STATE:
-  PATH: "data/state.json"
+    SILENCE_HOURS: 24                  # 24 часа тишины при 429/Verify

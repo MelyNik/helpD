@@ -1,17 +1,13 @@
 from dataclasses import dataclass
+import os
 
-
-ACCOUNTS_FILE = "data/accounts.xlsx"
+# Allow override via ENV; fallback to repository data file
+ACCOUNTS_FILE = os.getenv("DISCORD_ACCOUNTS_PATH", "data/accounts.xlsx")
 
 DISCORD_CAPTCHA_SITEKEY = "a9b5fb07-92ff-493f-86fe-352a2803b3df"
 
-
 @dataclass
 class Account:
-    """
-    Класс для хранения данных аккаунта Discord
-    """
-
     index: int
     token: str
     proxy: str
@@ -25,10 +21,6 @@ class Account:
 
 @dataclass
 class DataForTasks:
-    """
-    Класс для хранения данных для задач
-    """
-
     LEAVE_GUILD_IDS: list[str]
     PROFILE_PICTURES: list[str]
     EMOJIS_INFO: list[dict]
@@ -42,8 +34,7 @@ class DataForTasks:
     BUTTON_PRESSER_CHANNEL_ID: str | None
     BUTTON_PRESSER_MESSAGE_ID: str | None
 
-
-MAIN_MENU_OPTIONS = [
+MAIN_MENU = [
     "AI Chatter",
     "Inviter [Token]",
     "Press Button [Token]",
