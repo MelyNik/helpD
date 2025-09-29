@@ -4,6 +4,10 @@ import sys
 import asyncio
 from process import start
 
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=".env", override=False)
+
+
 
 async def main():
     configuration()
